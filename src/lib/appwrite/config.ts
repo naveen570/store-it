@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env } from "@/constants/env";
 
 export const appwriteConfig = {
   projectId: env.NEXT_PUBLIC_APPWRITE_PROJECT,

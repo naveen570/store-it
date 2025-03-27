@@ -18,7 +18,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { sendEmailOTP, verifyOTP } from "@/actions/user-actions";
+import { sendEmailOTP, verifyOTP } from "@/lib/actions/user-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { Button } from "@/components/ui/button";

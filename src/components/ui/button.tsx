@@ -20,6 +20,8 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        ["sign-out"]:
+          "bg-brand/10 text-brand hover:bg-brand/20 rounded-full p-0 shadow-none transition-all",
       },
       size: {
         default: "h-[50px] px-4 py-2 has-[>svg]:px-3",

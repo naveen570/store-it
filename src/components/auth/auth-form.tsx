@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { createAccount } from "@/actions/user-actions";
+import { createAccount } from "@/lib/actions/user-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,17 +46,15 @@ export const AuthForm = ({ type }: AuthFormProps) => {
   async function onSubmit(values: AuthFormValues) {
     try {
       setErrorMessage("");
-      if (type === "sign-up") {
-        const result = await createAccount({
-          email: values.email,
-          fullName: values.fullName ?? "",
-        });
-        if (result?.data?.accountId) {
-          setAccountId(result.data.accountId);
-          setIsOpen(true);
-        } else {
-          setErrorMessage("Failed to create account");
-        }
+      const result = await createAccount({
+        email: values.email,
+        fullName: values.fullName ?? "",
+      });
+      if (result?.data?.accountId) {
+        setAccountId(result.data.accountId);
+        setIsOpen(true);
+      } else {
+        setErrorMessage("Failed to create account");
       }
     } catch (error) {
       console.error(error);
