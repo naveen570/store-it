@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { createAccount } from "@/lib/actions/user-actions";
+import { createAccount, signIn } from "@/lib/actions/user-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,15 +46,30 @@ export const AuthForm = ({ type }: AuthFormProps) => {
   async function onSubmit(values: AuthFormValues) {
     try {
       setErrorMessage("");
-      const result = await createAccount({
-        email: values.email,
-        fullName: values.fullName ?? "",
-      });
-      if (result?.data?.accountId) {
-        setAccountId(result.data.accountId);
-        setIsOpen(true);
-      } else {
-        setErrorMessage("Failed to create account");
+      if (type === "sign-up") {
+        const result = await createAccount({
+          email: values.email,
+          fullName: values.fullName ?? "",
+        });
+        if (result?.data?.accountId) {
+          setAccountId(result.data.accountId);
+          setIsOpen(true);
+        } else {
+          console.error(result?.serverError);
+          setErrorMessage(result?.serverError ?? "Failed to sign in");
+        }
+      }
+      if (type === "sign-in") {
+        const result = await signIn({
+          email: values.email,
+        });
+        if (result?.data?.accountId) {
+          setAccountId(result.data.accountId);
+          setIsOpen(true);
+        } else {
+          console.error(result);
+          setErrorMessage(result?.serverError ?? "Failed to sign in");
+        }
       }
     } catch (error) {
       console.error(error);

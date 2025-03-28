@@ -4,7 +4,8 @@ import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { avatarPlaceholderURL } from "@/constants";
 import { actionClient } from "@/lib/safe-action";
-import { parseStringify } from "@/lib/utils";
+import { userNotFoundError } from "@/lib/errors";
+import { redirect } from "next/navigation";
 import { ID, Query } from "node-appwrite";
 import { userSchema } from "@/lib/schema";
 import { cookies } from "next/headers";
@@ -69,9 +70,18 @@ export const createAccount = actionClient
         },
       );
     }
-    return parseStringify({ accountId: result?.data?.accountId });
+    return { accountId: result?.data?.accountId };
   });
-
+export const signIn = actionClient
+  .schema(emailSchema)
+  .action(async ({ parsedInput: { email } }) => {
+    const existingUser = await getUserByEmail({ email });
+    if (!existingUser?.data) {
+      userNotFoundError();
+    }
+    const result = await sendEmailOTP({ email });
+    return { accountId: result?.data?.accountId };
+  });
 export const verifyOTP = actionClient
   .schema(verifyOTPSchema)
   .action(async ({ parsedInput: { accountId, otp } }) => {
@@ -107,3 +117,15 @@ export const getCurrentUser = actionClient
       throw error;
     }
   });
+export const signOut = actionClient.action(async () => {
+  try {
+    const { account } = await createSessionClient();
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
+  } catch (error) {
+    console.error(error, "Failed to sign out");
+    throw error;
+  } finally {
+    redirect("/sign-in");
+  }
+});
