@@ -1,5 +1,7 @@
 import { env } from "@/constants/env";
-
+if (!env) {
+  throw new Error("env is not defined");
+}
 export const appwriteConfig = {
   projectId: env.NEXT_PUBLIC_APPWRITE_PROJECT,
   endpoint: env.NEXT_PUBLIC_APPWRITE_ENDPOINT,

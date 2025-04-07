@@ -40,7 +40,7 @@ export const MobileNavbar = () => {
             className="cursor-pointer object-contain"
           />
         </SheetTrigger>
-        <SheetContent className="shad-sheet h-screen px-3">
+        <SheetContent className="shad-sheet h-screen overflow-y-auto px-3">
           <SheetHeader>
             <SheetTitle>
               <div className="header-user">
@@ -91,7 +91,10 @@ export const MobileNavbar = () => {
             </ul>
           </nav>
           <Separator className="bg-light-200/20 my-5" />
-          <FileUploader />
+          <FileUploader
+            ownerId={user?.$id || ""}
+            accountId={user?.account_id || ""}
+          />
 
           <Button
             variant={"sign-out"}

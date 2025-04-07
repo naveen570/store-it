@@ -8,4 +8,6 @@ const envSchema = z.object({
   NEXT_PUBLIC_APPWRITE_ENDPOINT: z.string(),
   NEXT_APPWRITE_KEY: z.string(),
 });
-export const env = envSchema.parse(process.env);
+// export const env = envSchema.parse(process.env);
+export const env = envSchema.safeParse(process.env).data;
+console.log(env);

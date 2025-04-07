@@ -1,20 +1,16 @@
 "use server";
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
+import { ID, Permission, Query, Role } from "node-appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { avatarPlaceholderURL } from "@/constants";
 import { actionClient } from "@/lib/safe-action";
 import { userNotFoundError } from "@/lib/errors";
 import { redirect } from "next/navigation";
-import { ID, Query } from "node-appwrite";
 import { userSchema } from "@/lib/schema";
+import { handleError } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { z } from "zod";
-
-const handleError = (error: unknown, message: string): never => {
-  console.error(message, error);
-  throw new Error(message);
-};
 
 const emailSchema = z.object({ email: z.string().email() });
 const createAccountSchema = z.object({
@@ -22,6 +18,7 @@ const createAccountSchema = z.object({
   fullName: z.string(),
 });
 const verifyOTPSchema = z.object({ accountId: z.string(), otp: z.string() });
+
 export const getUserByEmail = actionClient
   .schema(emailSchema)
   .action(async ({ parsedInput: { email } }) => {
@@ -50,6 +47,30 @@ export const sendEmailOTP = actionClient
     }
   });
 
+export const getAvatartImageByName = actionClient
+  .schema(createAccountSchema.pick({ fullName: true }))
+  .action(async ({ parsedInput: { fullName } }) => {
+    const { avatars, storage } = await createAdminClient();
+    console.log(fullName, "fullName");
+    const result = await avatars.getInitials(fullName, 50, 50);
+    console.log(result, "result");
+    const file = new File([result], `${ID.unique()}.png`, {
+      type: "image/png",
+    });
+    const newFile = await storage.createFile(
+      appwriteConfig.bucket,
+      ID.unique(),
+      file,
+      [Permission.read(Role.any())],
+    );
+    console.log(newFile.name, "newFile");
+    // const url = await storage.getFilePreview(
+    //   appwriteConfig.bucket,
+    //   newFile.$id,
+    // );
+    // console.log(url, "url");
+  });
+
 export const createAccount = actionClient
   .schema(createAccountSchema)
   .action(async ({ parsedInput: { email, fullName } }) => {
@@ -58,7 +79,7 @@ export const createAccount = actionClient
 
     if (!existingUser?.data) {
       const { databases } = await createAdminClient();
-      databases.createDocument(
+      await databases.createDocument(
         appwriteConfig.database,
         appwriteConfig.usersCollection,
         ID.unique(),
@@ -72,6 +93,7 @@ export const createAccount = actionClient
     }
     return { accountId: result?.data?.accountId };
   });
+
 export const signIn = actionClient
   .schema(emailSchema)
   .action(async ({ parsedInput: { email } }) => {
@@ -82,6 +104,7 @@ export const signIn = actionClient
     const result = await sendEmailOTP({ email });
     return { accountId: result?.data?.accountId };
   });
+
 export const verifyOTP = actionClient
   .schema(verifyOTPSchema)
   .action(async ({ parsedInput: { accountId, otp } }) => {
@@ -117,6 +140,7 @@ export const getCurrentUser = actionClient
       throw error;
     }
   });
+
 export const signOut = actionClient.action(async () => {
   try {
     const { account } = await createSessionClient();

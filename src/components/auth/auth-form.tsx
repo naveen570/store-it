@@ -46,30 +46,24 @@ export const AuthForm = ({ type }: AuthFormProps) => {
   async function onSubmit(values: AuthFormValues) {
     try {
       setErrorMessage("");
+      let result;
       if (type === "sign-up") {
-        const result = await createAccount({
+        result = await createAccount({
           email: values.email,
           fullName: values.fullName ?? "",
         });
-        if (result?.data?.accountId) {
-          setAccountId(result.data.accountId);
-          setIsOpen(true);
-        } else {
-          console.error(result?.serverError);
-          setErrorMessage(result?.serverError ?? "Failed to sign in");
-        }
-      }
-      if (type === "sign-in") {
-        const result = await signIn({
+      } else if (type === "sign-in") {
+        result = await signIn({
           email: values.email,
         });
-        if (result?.data?.accountId) {
-          setAccountId(result.data.accountId);
-          setIsOpen(true);
-        } else {
-          console.error(result);
-          setErrorMessage(result?.serverError ?? "Failed to sign in");
-        }
+      }
+
+      if (result?.data?.accountId) {
+        setAccountId(result.data.accountId);
+        setIsOpen(true);
+      } else {
+        console.error(result?.serverError || result);
+        setErrorMessage(result?.serverError ?? "Failed to submit form");
       }
     } catch (error) {
       console.error(error);
